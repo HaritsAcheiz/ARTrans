@@ -1,16 +1,15 @@
 from datetime import datetime, timedelta
 from airflow.decorators import dag
 from airflow.operators.bash import BashOperator
-from airflow.operators.python import PythonOperator
-from airflow.utils.dates import days_ago
 from includes.ARTrans import ARTrans
 
 default_args = {
     'owner': 'Transjakarta',
     'retries': 1,
     'retry_delay': timedelta(minutes=5),
-    'start_date': days_ago(1),
-    'email': ['realisasi-bus@realisasi-bus.iam.gserviceaccount.com']
+    'start_date': datetime(2023, 10, 1),
+    'email': ['realisasi-bus@realisasi-bus.iam.gserviceaccount.com'],
+    'catchup': False
     # 'depends_on_past': False,
     # 'email_on_failure': False,
     # 'email_on_retry': False,
@@ -35,13 +34,10 @@ artrans = ARTrans()
      catchup=False,
      schedule='@daily',
      default_args=default_args,
+
      )
 
 def daily12():
-
-    # get_gs_values = PythonOperator(task_id='get_gs_values',
-    #                                python_callable=artrans.sheet_to_csv())
-    #
 
     get_gs_values = BashOperator(task_id='get_gs_values',
                                  bash_command="python /opt/airflow/dags/includes/ARTrans.py")

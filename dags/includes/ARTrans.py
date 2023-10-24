@@ -17,7 +17,8 @@ class ARTrans:
     succeed = 0
     while retries < 3:
       try:
-        keypath = '/opt/airflow/dags/includes/gcp/gcp-service-account.json'
+        # keypath = '/opt/airflow/dags/includes/gcp/gcp-service-account.json'
+        keypath = 'D:/Naru/ARTrans/dags/includes/gcp/gcp-service-account.json'
         print(os.getcwd())
         creds = Credentials.from_service_account_file(keypath)
         service = build(serviceName='sheets', version='v4', credentials=creds)
@@ -32,10 +33,8 @@ class ARTrans:
     else:
       print('Failed')
 
-  def get_spreadsheet_info(self):
+  def get_spreadsheet_info(self, service, spreadsheetId):
     print('Getting spreadsheet info...')
-    service = self.create_service()
-    spreadsheetId = '1JbXR9vEZM3TcbQbxysqfYuYjkYbUPaToOlCpS4c8mZ8'
     retries = 0
     succeed = 0
     while retries < 3:
@@ -52,14 +51,10 @@ class ARTrans:
     else:
       print('Failed!')
 
-  def sheet_to_csv(self):
+  def sheet_to_csv(self, service, spreadsheetId, range, filepath):
     print('Downloading spreadsheet...')
     retries = 0
     succeed = 0
-    service = self.create_service()
-    spreadsheetId = '1JbXR9vEZM3TcbQbxysqfYuYjkYbUPaToOlCpS4c8mZ8'
-    range = 'Realisasi_History.csv'
-    filepath = '/opt/airflow/dags/includes/data/Realisasi_History.csv'
     while retries < 3:
       try:
         result = service.spreadsheets().values().get(spreadsheetId=spreadsheetId, range=range).execute()
@@ -76,11 +71,21 @@ class ARTrans:
     else:
       print('Download Failed!')
 
+  def nbrt_to_csv(self, cell_range):
+    self.sheet_to_csv(service=service, spreadsheetId='1JbXR9vEZM3TcbQbxysqfYuYjkYbUPaToOlCpS4c8mZ8', range=f'Realisasi_History.csv!{cell_range}', filepath='/opt/airflow/dags/includes/data/realisasi_history_nbrt.csv')
+
+  def mikrotrans_to_csv(self, cell_range):
+    self.sheet_to_csv(service=service, spreadsheetId='1Y2x3GD0f4qiKLqmodEF9YBqJneQkVNDJyBpNteu8_2c', range=f'Realisasi_History.csv!{cell_range}', filepath='/opt/airflow/dags/includes/data/realisasi_history_mikrotrans.csv')
+
+  def get_range(self):
+
 
 if __name__ == '__main__':
   artrans = ARTrans()
-  artrans.sheet_to_csv()
-  # service = artrans.create_service()
-  # sheet_info = artrans.get_spreadsheet_info(service=service, spreadsheetId='1JbXR9vEZM3TcbQbxysqfYuYjkYbUPaToOlCpS4c8mZ8')
-  # print(sheet_info)
-  # artrans.sheet_to_csv(service=service, spreadsheetId='1JbXR9vEZM3TcbQbxysqfYuYjkYbUPaToOlCpS4c8mZ8', range='Realisasi_History.csv', filepath='./data/Realisasi_History.csv')
+  service = artrans.create_service()
+  sheet_info_nbrt = artrans.get_spreadsheet_info(service=service, spreadsheetId='1JbXR9vEZM3TcbQbxysqfYuYjkYbUPaToOlCpS4c8mZ8')
+  print(sheet_info_nbrt)
+  sheet_info_mikrotrans = artrans.get_spreadsheet_info(service=service, spreadsheetId='1Y2x3GD0f4qiKLqmodEF9YBqJneQkVNDJyBpNteu8_2c')
+  print(sheet_info_mikrotrans)
+  # artrans.sheet_to_csv(service=service, spreadsheetId='1JbXR9vEZM3TcbQbxysqfYuYjkYbUPaToOlCpS4c8mZ8', range='Realisasi_History.csv', filepath = '/opt/airflow/dags/includes/data/realisasi_history_nbrt.csv')
+  # artrans.sheet_to_csv(service=service, spreadsheetId='1Y2x3GD0f4qiKLqmodEF9YBqJneQkVNDJyBpNteu8_2c', range='', filepath='/opt/airflow/dags/includes/data/realisasi_history_mikrotrans.csv')
